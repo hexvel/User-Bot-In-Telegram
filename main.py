@@ -5,10 +5,6 @@ from contextlib import redirect_stdout
 
 app = Client("my_account")
 
-
-@app.on_message(filters.command("контакты"))
-
-
 @app.on_message(filters.command("челы", prefixes="."))
 async def get_chat_members(client, message):
     try:
@@ -66,13 +62,7 @@ async def test(client, message):
                                                     f"```{e}```")
 
 
-@app.on_message(filters.command("1", prefixes="."))
-async def test(client, message):
-    try:
-        test = await app.get_messages(message.chat.id, message.reply_to_message.message.id)
-        await app.send_message(message.chat.id, f"{test}")
-    except Exception as e:
-        await app.send_message(message.chat.id, e)
+
 @app.on_message()
 async def glavnaya(client, message):
     db = sqlite3.connect("server.db")
@@ -85,11 +75,6 @@ async def glavnaya(client, message):
     except:
         pass
 
-
-    if message.text == "контакты":
-        async for i in app.get_dialogs():
-            await app.send_message(message.chat.id, i.chat.title or i.chat.first_name)
-
     elif message.text == ".2ч":
         await app.edit_message_text(message.chat.id, message.id, ":-(")
 
@@ -101,37 +86,6 @@ async def glavnaya(client, message):
             all_users += f"{i[0]}\n"
         await app.edit_message_text(message.chat.id, message.id, f"Айди пользователей:\n{all_users}")
 
-
-
-    elif message.text == "add":
-        if not message.reply_to_message:
-            await app.edit_message_text(message.chat.id, message.id, "Пожалуйста, ответьте на сообщение")
-        else:
-            sql.execute("SELECT id FROM users")
-            data = sql.fetchone()
-            if data is None:
-                sql.execute(f"INSERT INTO users VALUES (?)", (message.reply_to_message.from_user.id,))
-                db.commit()
-                await app.edit_message_text(message.chat.id, message.id, "Пользователь успешно добавлен в бд")
-            else:
-                await app.edit_message_text(message.chat.id, message.id, "Пользователь уже находится в бд")
-
-
-
-
-    elif message.text == "delete":
-        if not message.reply_to_message:
-            await app.edit_message_text(message.chat.id, message.id, "Пожалуйста, ответьте на сообщение")
-        else:
-            sql.execute("SELECT id FROM users")
-            data = sql.fetchone()
-            if data is None:
-                await app.edit_message_text(message.chat.id, message.id, "Пользователь и не находится в бд")
-
-            else:
-                sql.execute(f"DELETE FROM users WHERE id = {message.reply_to_message.from_user.id}")
-                db.commit()
-                await app.edit_message_text(message.chat.id, message.id, "Пользователь успешно удалён из бд")
 
     elif message.text == "ыы":
         await app.edit_message_text(message.chat.id, message.id, "🌑✨✨🌏✨✨✨")
